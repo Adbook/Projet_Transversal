@@ -1,0 +1,8 @@
+"STARTUP.obj",
+"master_main.obj",
+"init_device.obj",
+"decodage_commande.obj",
+"serial_io.obj",
+"UART0_RingBuffer_lib.obj" 
+TO "Master" 
+RAMSIZE(256) 

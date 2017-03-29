@@ -1,0 +1,128 @@
+C51 COMPILER V9.52.0.0   INIT_DEVICE                                                       03/29/2017 09:52:01 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE INIT_DEVICE
+OBJECT MODULE PLACED IN init_device.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE init_device.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #define SYSCLK 22118400
+   2          #define BAUDRATE 19200
+   3          
+   4          #include "init_device.h"
+   5          #include <c8051f020.h> 
+   6          
+   7          void init_device(){     
+   8   1              P0MDOUT = 0xC1;
+   9   1              XBR0 = 0x06;
+  10   1              XBR1 = 0xF8;
+  11   1              XBR2 = 0x44;
+  12   1              
+  13   1              Config_Watchdog();
+  14   1              Oscillator_Init();
+  15   1              //CFG_Clock_UART0();
+  16   1              CFG_UART0();
+  17   1              CFG_UART1();
+  18   1      
+  19   1      }
+  20          /*void UART0_ISR() interrupt 4{
+  21                  EA = 0;
+  22                  /*if(TI0 == 1)
+  23                  {
+  24                          
+  25                          TI0 = 0;
+  26                  }else if(RI0 == 0){
+  27                          
+  28                          
+  29                  }
+  30                  */
+  31                  
+  32                  /*EA = 1;
+  33          }*/
+  34          
+  35          void Oscillator_Init(){
+  36   1              int i = 0;
+  37   1              OSCXCN = 0x65;
+  38   1              for(i = 0; i < 3000; i++);
+  39   1              while((OSCXCN & 0x80) == 0);
+  40   1              OSCICN = 0x0C;
+  41   1      }
+  42          
+  43          
+  44          void Config_Watchdog(){
+  45   1              WDTCN = 0xDE;
+  46   1              WDTCN = 0xAD;
+  47   1      }
+  48          
+  49          void CFG_Clock_UART0(){
+  50   1              CKCON |= 0x10;
+  51   1              TMOD |= 0x20;
+  52   1              TMOD &= 0x2F;
+  53   1              TF1 = 0;
+  54   1              TH1 = - (SYSCLK / (BAUDRATE *  16)); //th1 reload value
+  55   1              
+C51 COMPILER V9.52.0.0   INIT_DEVICE                                                       03/29/2017 09:52:01 PAGE 2   
+
+  56   1              TR1 = 1; //Timer 1 démarré
+  57   1              EA = 1;
+  58   1              
+  59   1      }
+  60          void CFG_UART0(){
+  61   1              /*RCLK0 = 0; //set source clock: timer 1
+  62   1              TCLK0 = 0;
+  63   1              PCON |= 0x80; //Baud rate doubler disabled
+  64   1              PCON &= 0xBF; //SSTAT0 = 0 (Frame error detection off)
+  65   1              SCON0 = 0x70; // Mode 1: 8-Bit UART, Variable Baud Rate --- user software writes data to the SBUF0 regist
+             -er while a transmit is in progress --- réception activée
+  66   1              TI0 = 1; // clear du flag de transmission
+  67   1              ES0 = 1; //activation interruption UART0;*/
+  68   1              
+  69   1              /* A REPRENDRE */
+  70   1              TF1 =0; //flag désactivé
+  71   1              SCON0 = 0x50; // UART mode 1, 8-bit UART, enable RX
+  72   1              TMOD = 0x20; // TMOD: timer 1, mode 2, 8-bit reload
+  73   1              TH1 = -(SYSCLK/BAUDRATE/16); // set Timer1 reload value for baudrate
+  74   1              TL1 = TH1; // set Timer1 initial value
+  75   1              CKCON |= 0x10; // Timer1 uses SYSCLK as time base
+  76   1              TR1 = 1; // start Timer1
+  77   1              ES0 = 1; // enable UART0 interrupts
+  78   1              
+  79   1              //CFG_Clock_UART0
+  80   1              RCLK0 =0;   //T2CON source CLK timer1
+  81   1          TCLK0 =0;   //T2CON
+  82   1          PCON |=0x80;    //SMOD0
+  83   1          PCON &=0xBF;    //SSTAT0=0
+  84   1          SCON0 =0x72;    //mode 1 : check stop bit - reception validée
+  85   1      }
+  86          void CFG_UART1(){
+  87   1      /*      
+  88   1              T4CON &= 0xCF; // Timer 1 overflows used for transmit/receive clock.
+  89   1              PCON |= 0x10; //SMOD1: UART1 Baud Rate Doubler Enable. (désactivé)
+  90   1              PCON &= 0xF7; //SSTAT1: Reads/writes of SM21-SM01 access the SM21-SM01 UART1 mode setting.
+  91   1              SCON1 = 0x70; //Mode 1: 8-Bit UART, Variable Baud Rate ---
+  92   1          
+  93   1      */
+  94   1              SCON1 = 0x50; // SCON1: mode 1, 8-bit UART, enable RX
+  95   1              TMOD = 0x20; // TMOD: timer 1, mode 2, 8-bit reload
+  96   1              TH1 = -(SYSCLK/BAUDRATE/16); // set Timer1 reload value for baudrate
+  97   1              CKCON |= 0x10; // Timer1 uses SYSCLK as time base
+  98   1              PCON |= 0x10; // SMOD1 = 1
+  99   1              TR1 = 1; // start Timer1
+ 100   1              EIE2 |= 0x40; // enable UART1 interrupts
+ 101   1      
+ 102   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    132    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

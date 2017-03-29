@@ -1,0 +1,69 @@
+C51 COMPILER V9.52.0.0   SERIAL_IO                                                         03/29/2017 09:52:01 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE SERIAL_IO
+OBJECT MODULE PLACED IN serial_io.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE serial_io.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "serial_io.h"
+   2          #include <c8051f020.h> 
+   3          #include <intrins.h>
+   4          #include "UART0_RingBuffer_lib.h"
+   5          char Putchar(char c)
+   6          {
+   7   1        SBUF1 =c;   //UART prêt
+   8   1              while (SCON1 == 0x50);  
+   9   1              SCON1 &= 0xfd;  // TI1 a 0
+  10   1                      
+  11   1        return 0;
+  12   1      }
+  13          
+  14          
+  15          char Send_String(char * char_ptr)
+  16          {
+  17   1          
+  18   1              char c;
+  19   1              xdata unsigned int j = 0;
+  20   1              EA = 0;
+  21   1          while(char_ptr[j] != '\0')
+  22   1              { 
+  23   2                      c = Putchar(char_ptr[j]);
+  24   2                      j ++;
+  25   2                      //compteur++;
+  26   2      
+  27   2              }
+  28   1              EA = 1;
+  29   1              return 0;
+  30   1          
+  31   1      }
+  32          
+  33          char Getchar()
+  34          {
+  35   1              char c;
+  36   1              
+  37   1              if(RI0 == 0)
+  38   1                      return 0;
+  39   1      
+  40   1              c = SBUF0;
+  41   1              RI0 = 0;
+  42   1              
+  43   1              return c;
+  44   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     89    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.52.0.0   SERIAL_IO                                                         03/29/2017 09:52:01 PAGE 2   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
